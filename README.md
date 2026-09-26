@@ -10,3 +10,5 @@ A simple Go + HTMX project.
    go run main.go
    ```
 3. Open your browser at `http://localhost:8080`.
+
+*Initialized by Kokoa.*
