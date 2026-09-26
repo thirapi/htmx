@@ -1,5 +1,4 @@
-
-# Default ignores added by Kokoa Executor
+# Default ignores
 node_modules/
 dist/
 build/
@@ -9,10 +8,7 @@ build/
 out/
 *.log
 .DS_Store
-.env
-.env.local
-.env.production
-.env.development
+
 # Go
 go.sum
 *.exe
@@ -20,6 +16,8 @@ go.sum
 *.test
 bin/
 tmp/
+
+# Environment files
 .env
 .env.local
 .env.production
