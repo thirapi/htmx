@@ -1,0 +1,17 @@
+{{define "board"}}
+<div class="grid grid-cols-3 gap-4">
+    {{range $status := slice "todo" "in_progress" "done"}}
+    <div class="border p-4">
+        <h2 class="font-bold capitalize">{{$status}}</h2>
+        {{range $.Tasks}}
+            {{if eq .Status $status}}
+            <div class="border p-2 my-2">
+                {{.Title}}
+                <button hx-post="/tasks/delete" hx-vals='{{json (dict "id" .ID)}}' hx-target="#board" class="text-red-500">Delete</button>
+            </div>
+            {{end}}
+        {{end}}
+    </div>
+    {{end}}
+</div>
+{{end}}

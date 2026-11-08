@@ -3,21 +3,19 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 )
 
-func TestIndexHandler(t *testing.T) {
-	req, err := http.NewRequest("GET", "/", nil)
+func TestTasksHandler(t *testing.T) {
+	req, err := http.NewRequest("GET", "/tasks", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Mocking template execution for test
-		w.WriteHeader(http.StatusOK)
-	})
+	handler := http.HandlerFunc(tasksHandler)
 
 	handler.ServeHTTP(rr, req)
 
@@ -26,26 +24,59 @@ func TestIndexHandler(t *testing.T) {
 	}
 }
 
-func TestTimeHandler(t *testing.T) {
-	req, err := http.NewRequest("GET", "/api/time", nil)
+func TestAddTaskHandler(t *testing.T) {
+	form := url.Values{}
+	form.Add("title", "TestTask")
+	req, err := http.NewRequest("POST", "/tasks/add", strings.NewReader(form.Encode()))
 	if err != nil {
 		t.Fatal(err)
 	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Logic from main.go
-		w.Write([]byte("Current time: test"))
-	})
+	handler := http.HandlerFunc(addTaskHandler)
 
 	handler.ServeHTTP(rr, req)
 
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
+}
 
-	expected := "Current time:"
-	if !strings.Contains(rr.Body.String(), expected) {
-		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+func TestMoveTaskHandler(t *testing.T) {
+	// Valid move
+	form := url.Values{}
+	form.Add("id", "1")
+	form.Add("status", "done")
+	req, err := http.NewRequest("POST", "/tasks/move", strings.NewReader(form.Encode()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(moveTaskHandler)
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
+	}
+}
+
+func TestDeleteTaskHandler(t *testing.T) {
+	form := url.Values{}
+	form.Add("id", "1")
+	req, err := http.NewRequest("POST", "/tasks/delete", strings.NewReader(form.Encode()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(deleteTaskHandler)
+	handler.ServeHTTP(rr, req)
+
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
 }
