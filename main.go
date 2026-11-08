@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -17,7 +18,25 @@ var (
 	tasks  = []Task{{ID: 1, Title: "Learn HTMX", Status: "todo"}}
 	nextID = 2
 	mu     sync.Mutex
+	tmpl   *template.Template
 )
+
+func init() {
+	tmpl = template.Must(template.New("").Funcs(template.FuncMap{
+		"slice": func(s ...string) []string { return s },
+		"json": func(v interface{}) string {
+			b, _ := json.Marshal(v)
+			return string(b)
+		},
+		"dict": func(values ...interface{}) (map[string]interface{}, error) {
+			dict := make(map[string]interface{})
+			for i := 0; i < len(values); i += 2 {
+				dict[values[i].(string)] = values[i+1]
+			}
+			return dict, nil
+		},
+	}).ParseFiles("templates/index.html", "templates/board.html"))
+}
 
 func main() {
 	http.HandleFunc("/", indexHandler)
@@ -30,17 +49,15 @@ func main() {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.html", "templates/board.html"))
 	tmpl.ExecuteTemplate(w, "index.html", nil)
 }
 
 func tasksHandler(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.New("board").Funcs(template.FuncMap{
-		"slice": func(s ...string) []string { return s },
-	}).ParseFiles("templates/board.html"))
+	mu.Lock()
 	data := struct {
 		Tasks []Task
-	}{Tasks: tasks}
+	}{Tasks: append([]Task(nil), tasks...)}
+	mu.Unlock()
 	tmpl.ExecuteTemplate(w, "board", data)
 }
 

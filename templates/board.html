@@ -7,7 +7,7 @@
             {{if eq .Status $status}}
             <div class="border p-2 my-2">
                 {{.Title}}
-                <button hx-post="/tasks/delete" hx-vals='{"id": "{{.ID}}"}' hx-target="#board" class="text-red-500">Delete</button>
+                <button hx-post="/tasks/delete" hx-vals='{{json (dict "id" .ID)}}' hx-target="#board" class="text-red-500">Delete</button>
             </div>
             {{end}}
         {{end}}
