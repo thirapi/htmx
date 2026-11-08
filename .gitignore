@@ -22,3 +22,6 @@ tmp/
 .env.local
 .env.production
 .env.development
+
+# Default ignores added by Kokoa Executor
+server
